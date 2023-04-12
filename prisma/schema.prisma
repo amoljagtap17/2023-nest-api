@@ -1,0 +1,72 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String   @id @default(auto()) @map("_id") @db.ObjectId
+  email         String   @unique
+  hash          String
+  role          Role     @default(USER)
+  refreshToken  String?  @map("refresh-token")
+  emailVerified Boolean  @default(false)
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  @@map("users")
+}
+
+model Skill {
+  id        String        @id @default(auto()) @map("_id") @db.ObjectId
+  name      String        @unique
+  percent   Int
+  category  SkillCategory
+  createdAt DateTime      @default(now()) @map("created_at")
+  updatedAt DateTime      @updatedAt @map("updated_at")
+
+  @@map("skills")
+}
+
+model Blog {
+  id             String       @id @default(auto()) @map("_id") @db.ObjectId
+  slug           String       @unique
+  title          String
+  excerpt        String
+  content        String
+  category       BlogCategory @relation(fields: [blogCategoryId], references: [id])
+  ratings        Float
+  isPublished    Boolean      @default(false)
+  createdAt      DateTime     @default(now()) @map("created_at")
+  updatedAt      DateTime     @updatedAt @map("updated_at")
+  blogCategoryId String       @db.ObjectId
+
+  @@map("blogs")
+}
+
+model BlogCategory {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  name        String   @unique
+  description String
+  blogs       Blog[]
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@map("blog-categories")
+}
+
+enum Role {
+  ADMIN
+  USER
+}
+
+enum SkillCategory {
+  PRIMARY
+  SECONDARY
+}
